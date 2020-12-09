@@ -1,0 +1,5 @@
+{
+  "python.pythonPath": "/home/shothogun/Documents/Projects/Simple-Image-Processing-Exercises/venv/bin/python3.8",
+  "python.linting.pylintEnabled": true,
+  "python.linting.enabled": true
+}
