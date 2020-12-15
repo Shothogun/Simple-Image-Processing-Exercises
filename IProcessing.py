@@ -231,7 +231,7 @@ def ideal_filter_FFT(image, size=3):
     return img_back
 
 
-def image_enhancement(image, enhance):
+def image_enhancement_ideal(image, enhance):
     size = 3
     pad = 1
 
@@ -239,10 +239,21 @@ def image_enhancement(image, enhance):
 
     image = ideal_filter_FFT(image)
 
-    residue_image = np.ones((Hi + 2 * pad, Wi + 2 * pad), np.uint8) - image
-    image = image + residue_image * enhance + 516
+    residue_image = np.ones((Hi + 2 * pad, Wi + 2 * pad), np.uint8)*255 - image
+    image = image + residue_image * enhance -256
 
-    print(image)
+    return image
+
+def image_enhancement_gaussian(image, enhance):
+    size = 5
+    pad = 2
+
+    Hi, Wi = image.shape
+
+    image = blur_gaussian_FFT(image, 5)
+
+    residue_image = np.ones((Hi + 2 * pad, Wi + 2 * pad), np.uint8)*255 - image
+    image = image + residue_image * enhance -256
 
     return image
 
@@ -311,7 +322,8 @@ if __name__ == "__main__":
     high_pass_filtered_image = high_pass_convolve(gray_image)
 
     # 5. Image Low Pass enhancement
-    enhanced_image = image_enhancement(gray_image, 4)
+    enhanced_image_ideal = image_enhancement_ideal(gray_image, 4)
+    enhanced_image_gaussian = image_enhancement_gaussian(gray_image, 8)
 
     # 6. Filter Gaussian noise with low pass
     denoised_gaussian_image = add_gaussian_noise(gray_image, 0, 50)
@@ -372,10 +384,12 @@ if __name__ == "__main__":
     # 5. Image enhancement plot
     plt.figure(6)
     plt.suptitle("Enhancement Process")
-    plt.subplot(121), plt.imshow(gray_image, cmap="gray")
+    plt.subplot(131), plt.imshow(gray_image, cmap="gray")
     plt.title("Input Image"), plt.xticks([]), plt.yticks([])
-    plt.subplot(122), plt.imshow(enhanced_image, cmap="gray")
-    plt.title("Enhanced image"), plt.xticks([]), plt.yticks([])
+    plt.subplot(132), plt.imshow(enhanced_image_ideal, cmap="gray")
+    plt.title("Enhanced image Ideal"), plt.xticks([]), plt.yticks([])
+    plt.subplot(133), plt.imshow(enhanced_image_gaussian, cmap="gray")
+    plt.title("Enhanced image Gaussian"), plt.xticks([]), plt.yticks([])
 
     # 6. Gaussian denoised image Plot
     plt.figure(7)
@@ -395,7 +409,7 @@ if __name__ == "__main__":
     plt.subplot(132), plt.imshow(denoised_salt_pepper_image, cmap="gray")
     plt.title("Denoised image"), plt.xticks([]), plt.yticks([])
     plt.subplot(133), plt.imshow(filtered_salt_pepper_image, cmap="gray")
-    plt.title("Denoised image"), plt.xticks([]), plt.yticks([])
+    plt.title("Filtered image"), plt.xticks([]), plt.yticks([])
     plt.show()
 
     if "-write" in sys.argv:
